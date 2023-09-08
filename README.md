@@ -17,7 +17,7 @@ After generating the icons for existing folders, it can take a couple of minutes
 
 # Example:
 
-![image](https://github.com/idanach/Wicogen-windows-icon-generator/assets/142310044/85f6709d-1670-4a3d-a2bd-fd9b9cd00f98)
+![image](exaple.PNG)
 
 
 # If you liked this project
