@@ -17,4 +17,5 @@ A Tooltip window will pop up.
 If you have any questions or suggestions, feel free to do so in the discussions!
 
 examples of two of my folders:
+
 ![image](https://github.com/idanach/Wicogen-windows-icon-generator/assets/142310044/85f6709d-1670-4a3d-a2bd-fd9b9cd00f98)
