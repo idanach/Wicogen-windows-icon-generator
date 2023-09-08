@@ -2,6 +2,8 @@
 Easily Customize your folders and make Windows suite to your taste!<br />
 You can create folders from existing icons, apply them to folders, or even search the net for icons you like!
 
+Download the portable program: [Wicogen](https://github.com/idanach/Wicogen-windows-icon-generator/releases/tag/V1.0.0)
+
 Supported sources for online search: 
   - Google images 
   - Bing images
