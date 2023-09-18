@@ -46,6 +46,8 @@ def main(dst_folder: str,
                     copy_file(found_cover, f'{dst_folder_path}/icon.ico', overwrite_files)
             else:
                 print(f'{Fore.LIGHTRED_EX}[Error] Code_10: Unsupported file type:{Style.RESET_ALL}{folder_name}')
+
+    os.system('cls')
     if btn:
         btn.configure(text="Downloading...", state="disabled")
     # ----------------------------------------------------- Print to console working destiny folder in light white

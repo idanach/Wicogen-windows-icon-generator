@@ -107,6 +107,7 @@ class ImageDownloader:
         if self.download_count < self.limit and self.verbose:
             print(f"\n\n[%] Done. Downloaded all non-restricted images ({self.download_count} images).")
             print("\n===============================================\n")
+
     def run(self):
         if self.overwrite_old_folder and self.query.replace(' ', '') != '':
             self.main_loop()

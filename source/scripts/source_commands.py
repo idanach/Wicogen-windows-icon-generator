@@ -9,7 +9,6 @@ from tkinter import filedialog as fd
 from . import image_downloader
 from . import imdb_image_downloader
 
-
 icon_sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
 supported_file_types = ('.bmp', '.cur', '.dds', '.dng', '.fts', '.nef', '.tga', '.pbm', '.pcd',
                         '.pcx', '.pgm', '.pnm', '.ppm', '.psd', '.ras', '.sgi', '.xbm',
@@ -19,7 +18,7 @@ supported_file_types = ('.bmp', '.cur', '.dds', '.dng', '.fts', '.nef', '.tga', 
 
 # ---------------------------------------------------------------------------------------------------------- misc
 def clear_thumbnail_cache():
-    # clear windows thumbnail and icon cache
+    """Clear windows thumbnail and icon cache."""
     os.system(r'c:\Windows\System32\ie4uinit.exe -show >nul 2>&1')
     os.system(r'DEL /A /Q "%localappdata%\IconCache.db" >nul 2>&1')
     os.system(r'del /f /s /q /a %LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db >nul 2>&1')
@@ -29,19 +28,21 @@ def clear_thumbnail_cache():
 
 
 def refresh_explorer():
+    """Refresh Windows explorer."""
     os.system(r"c:\Windows\System32\ie4uinit.exe -show >nul 2>&1")
     print(f'{Fore.LIGHTCYAN_EX}----------------------------Refreshed explorer----------------'
           f'------------{Style.RESET_ALL}')
 
 
 def restart_explorer():
+    """Restart Windows explorer."""
     os.system(r"taskkill /F /IM explorer.exe & start explorer >nul 2>&1")
     print(f'{Fore.LIGHTCYAN_EX}----------------------------Restarted explorer----------------'
           f'------------{Style.RESET_ALL}')
 
 
 def resource_path_finder(relative_path: str, verbose: bool = False):
-    """ Get absolute path to resource (exe attributes), works for dev and for PyInstaller """
+    """Get absolute path to resource (exe attributes), works for dev and for PyInstaller"""
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
@@ -53,7 +54,7 @@ def resource_path_finder(relative_path: str, verbose: bool = False):
 
 
 def error_codes(error_source, error_code, error_path, error_source2=''):
-    """print to screen color coded error codes"""
+    """Print to screen color coded error codes."""
     if type(error_code) is FileNotFoundError:
         # print folder not found error in light cyan color
         print(f'{Fore.LIGHTYELLOW_EX}[Error] Code_1: Folder not found '
@@ -80,12 +81,8 @@ def make_dir_tree(folder: str):
         error_codes("Directory maker", exception, folder, 'Continuing normally')
 
 
-# ----------------------------------------------------------------
-# move the icon.ico file and the source file to the destination folder
-def copy_file(src: str,
-              dst: str,
-              overwrite_files: bool | int = 0,
-              make_hidden: bool | int = 1):
+def copy_file(src: str, dst: str, overwrite_files: bool | int = 0, make_hidden: bool | int = 1):
+    """Move a file from source to destination."""
     try:
         shutil.copy(src, dst)
         if make_hidden:
@@ -108,10 +105,12 @@ def copy_file(src: str,
 
 
 # ---------------------------------------------------------------------------------------------------------- gen app
-# ----------------------------------------------------------------
-# write a desktop.ini file in the destination folder and set its attributes
-# after that set the attributes of the folder
 def write_desktop_ini_file(dst_folder: str):
+    """
+    Creates a 'desktop.ini' file in the destination folder and sets its attributes (+s +h).
+    After that set the attributes of the folder (+r).
+    """
+
     def write_ini():
         with open(dst_file, 'wb') as w_ini_file:
             w_ini_file.write(ini_contents)  # Write shell info to ini file
@@ -119,7 +118,6 @@ def write_desktop_ini_file(dst_folder: str):
         os.system(rf'attrib +s +h "{dst_file}"')  # Add 'system' and 'hidden' attributes to desktop.ini file
         os.system(rf'attrib +r "{dst_folder}"')  # Add 'read' attribute to folder
 
-    # ini_contents = "[.ShellClassInfo]\r\nIconResource=icon.ico\r\n"  # old
     ini_contents = b'[.ShellClassInfo]\r\nIconResource=icon.ico\r\n'
     dst_file = f'{dst_folder}/desktop.ini'
     if os.path.isfile(dst_file):
@@ -127,22 +125,21 @@ def write_desktop_ini_file(dst_folder: str):
             temp_contents = ini_file.read()
         if temp_contents != ini_contents:
             print(f'{Fore.LIGHTYELLOW_EX}@. Deleting old desktop.ini file:{Style.RESET_ALL} {dst_file}')
-            os.remove(dst_file)  # Delete desktop.ini file if already exists
+            os.remove(dst_file)
             write_ini()
     else:
         write_ini()
 
 
-# todo fix transparent image turns black issue
-# ----------------------------------------------------------------
-# generate the icon in the destination folder
 def generate_icon(src_image_path: str,
                   dst_icon_path: str,
                   keep_image_dimensions: bool = 1,
-                  folder_style: str = '',
+                  icon_style: str = '',
                   overwrite_file: bool | int = True):
-    # Add corner to pic
+    """Generate the icon by style in the destination folder"""
+
     def add_corners(im, rad):
+        """Round picture corners for disk style"""
         circle = Image.new('L', (rad * 2, rad * 2), 0)
         draw = ImageDraw.Draw(circle)
         draw.ellipse((0, 0, rad * 2, rad * 2), fill=255)
@@ -158,7 +155,7 @@ def generate_icon(src_image_path: str,
     if os.path.exists(dst_icon_path) and not overwrite_file:
         return None
     image = Image.open(src_image_path)
-    if folder_style == 'Disk':
+    if icon_style == 'Disk':
         path = resource_path_finder("source/images/back.png")
         back = Image.open(path)
         size = (308, 461)
@@ -192,9 +189,8 @@ def generate_icon(src_image_path: str,
         error_codes('Icon generator', exc, dst_icon_path)
 
 
-# ----------------------------------------------------------------
-# Choose image for the folder
 def choose_image_dialog(start_folder: str = ''):
+    """Choose image file dialog."""
     image = ''
     file_extension = ''
     while file_extension not in supported_file_types:
@@ -206,24 +202,27 @@ def choose_image_dialog(start_folder: str = ''):
     return image
 
 
-# ----------------------------------------------------------------
-# download image from a search engine
 def download_images(query_string: str,
                     search_engine: str = 'google',
                     overwrite: bool | int = False,
                     manual_selection: bool | int = False,
                     looking_for: str = 'folder icon'):
+    """Download image from a search engine"""
     if search_engine == 'IMDB':
-        path = imdb_image_downloader.downloader(query_string[:30], overwrite=overwrite)
+        path = imdb_image_downloader.downloader(query_string[:20], overwrite=overwrite)
         if manual_selection:
             return choose_image_dialog(path)
         else:
             file_list = os.listdir(path)
-            return f'{path}/{file_list[0]}'
-    else:
-        path = image_downloader.downloader(search_engine, f'{query_string[:25]} {looking_for}', overwrite=overwrite)
+            if file_list:
+                return f'{path}/{file_list[0]}'
+            return None
+    elif search_engine == 'google':
+        path = image_downloader.downloader(search_engine, f'{query_string[:20]} {looking_for}', overwrite=overwrite)
         if manual_selection:
             return choose_image_dialog(path)
         else:
             file_list = os.listdir(path)
-            return f'{path}/{random.choice(file_list)}'
+            if file_list:
+                return f'{path}/{random.choice(file_list)}'
+            return None

@@ -68,6 +68,7 @@ def main(source_path: str,
         else:
             print(f'{Fore.LIGHTRED_EX}[Error] Code_10: Unsupported file type.{Style.RESET_ALL}{file}')
 
+    os.system('cls')
     if btn:
         btn.configure(text="Generating...", state="disabled")
     # ----------------------------------------------------- Print to console working destiny folder in light white
