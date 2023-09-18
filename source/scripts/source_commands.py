@@ -216,7 +216,6 @@ def download_images(query_string: str,
             return choose_image_dialog(path)
         else:
             file_list = os.listdir(path)
-            print(file_list)
             if file_list:
                 return f'{path}/{file_list[0]}'
             else:
@@ -228,7 +227,6 @@ def download_images(query_string: str,
             return choose_image_dialog(path)
         else:
             file_list = os.listdir(path)
-            print(file_list)
             if file_list:
                 return f'{path}/{random.choice(file_list)}'
             else:
