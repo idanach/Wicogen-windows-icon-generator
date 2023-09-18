@@ -4,3 +4,4 @@ customtkinter==5.2.0
 CTkToolTip==0.8
 colorama==0.4.6
 tqdm==4.66.1
+requests==2.31.0
