@@ -8,6 +8,7 @@ from colorama import Style
 from tkinter import filedialog as fd
 from . import image_downloader
 from . import imdb_image_downloader
+from . import mal_image_downloader
 
 
 icon_sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
@@ -40,6 +41,16 @@ def restart_explorer():
     os.system(r"taskkill /F /IM explorer.exe & start explorer >nul 2>&1")
     print(f'{Fore.LIGHTCYAN_EX}----------------------------Restarted explorer----------------'
           f'------------{Style.RESET_ALL}')
+
+
+def clear_old_download_folder():
+    folder = "Image downloads"
+    if os.path.exists(folder):
+        try:
+            shutil.rmtree(folder)
+            print(f'{Fore.LIGHTYELLOW_EX}@. Deleting old image downloads folder{Style.RESET_ALL}')
+        except Exception as exception:
+            error_codes("Directory maker", exception, folder, 'Continuing normally')
 
 
 def resource_path_finder(relative_path: str, verbose: bool = False):
@@ -76,8 +87,10 @@ def error_codes(error_source, error_code, error_path, error_source2=''):
 def make_dir_tree(folder: str):
     """Make directory tree."""
     try:
+        exist = os.path.exists(folder)
         os.makedirs(folder, exist_ok=True)
-        print(f'{Fore.LIGHTGREEN_EX}#. Created folder: {Style.RESET_ALL}{folder}')
+        if not exist:
+            print(f'{Fore.LIGHTGREEN_EX}#. Created folder: {Style.RESET_ALL}{folder}')
     except Exception as exception:
         error_codes("Directory maker", exception, folder, 'Continuing normally')
 
@@ -157,19 +170,23 @@ def generate_icon(src_image_path: str,
         return None
     image = Image.open(src_image_path)
     if folder_style == 'Disk':
-        path = resource_path_finder("source/images/back.png")
-        back = Image.open(path)
-        size = (308, 461)
-        if keep_image_dimensions:
-            image.thumbnail(size, Image.ANTIALIAS)
-        else:
-            image = image.resize(size)
-        image = add_corners(image, 11)
-        path = resource_path_finder("source/images/front.png")
-        front = Image.open(path)
-        image.paste(front, (0, 0), front)
-        back.paste(image, (59, 24), image)
-        image = back
+        try:
+            path = resource_path_finder("source/images/back.png")
+            back = Image.open(path)
+            size = (308, 461)
+            if keep_image_dimensions:
+                image.thumbnail(size, Image.ANTIALIAS)
+            else:
+                image = image.resize(size)
+            image = add_corners(image, 11)
+            path = resource_path_finder("source/images/front.png")
+            front = Image.open(path)
+            image.paste(front, (0, 0), front)
+            back.paste(image, (59, 24), image)
+            image = back
+        except ValueError:
+            image = Image.open(src_image_path)
+            image = image.resize((256, 256))
     elif keep_image_dimensions:
         width, height = image.size
         square_size = max(width, height)
@@ -211,7 +228,7 @@ def download_images(query_string: str,
                     manual_selection: bool | int = False,
                     looking_for: str = 'folder icon'):
     if search_engine == 'IMDB':
-        path = imdb_image_downloader.downloader(query_string[:20], overwrite=overwrite)
+        path = imdb_image_downloader.downloader(query_string, overwrite=overwrite)
         if manual_selection:
             return choose_image_dialog(path)
         else:
@@ -220,9 +237,18 @@ def download_images(query_string: str,
                 return f'{path}/{file_list[0]}'
             else:
                 return None
-
+    elif search_engine == 'MyAnimeList.net':
+        path = mal_image_downloader.downloader(query_string, overwrite=overwrite)
+        if manual_selection:
+            return choose_image_dialog(path)
+        else:
+            file_list = os.listdir(path)
+            if file_list:
+                return f'{path}/{file_list[0]}'
+            else:
+                return None
     else:
-        path = image_downloader.downloader(search_engine, f'{query_string[:20]} {looking_for}', overwrite=overwrite)
+        path = image_downloader.downloader(search_engine, f'{query_string} {looking_for}', overwrite=overwrite)
         if manual_selection:
             return choose_image_dialog(path)
         else:

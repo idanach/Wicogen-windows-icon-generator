@@ -5,6 +5,14 @@ from source.scripts import from_folder, from_net
 from source.scripts.source_commands import *
 from PIL import Image
 import webbrowser
+from tkinterdnd2 import TkinterDnD, DND_ALL
+import os
+
+
+supported_file_types = ('.bmp', '.cur', '.dds', '.dng', '.fts', '.nef', '.tga', '.pbm', '.pcd',
+                        '.pcx', '.pgm', '.pnm', '.ppm', '.psd', '.ras', '.sgi', '.xbm',
+                        '.jpg', '.jpeg', '.jpe', '.jif', '.jfif', '.jfi', '.jp2', '.jps',
+                        '.png', '.gif', '.webp', '.tiff', '.tif', '.ico')
 
 
 class Tabs(ctk.CTkTabview):
@@ -12,13 +20,12 @@ class Tabs(ctk.CTkTabview):
         super().__init__(master, **kwargs)
         path = resource_path_finder(rf"source\images\plus.png")
         self.folder_img = ctk.CTkImage(dark_image=Image.open(path), size=(23, 23))
-        self.font_name = ctk.ThemeManager.theme["CTkFont"]["family"]
         # Tab 1 - From folder
         tab = r"From Folder\File"
         self.add(tab)
         # ------------------------------------------------------------------------------------- Grid management
         self.tab(tab).grid_columnconfigure(1, weight=1)
-        self.tab(tab).grid_rowconfigure(9, weight=1)
+        self.tab(tab).grid_rowconfigure(10, weight=1)
         # ------------------------------------------------------------------------------------- Page Label
         row = 0
         self.t1_settings_label = ctk.CTkLabel(self.tab(tab), text='Settings:')
@@ -67,6 +74,8 @@ class Tabs(ctk.CTkTabview):
         self.t1_src_folder_or_file_path_box = ctk.CTkTextbox(self.tab(tab), height=20, state="disabled")
         self.t1_src_folder_or_file_path_box.grid(row=row + 2, column=0, columnspan=2, padx=(20, 130), pady=(0, 10),
                                                  sticky='ew')
+        self.t1_src_folder_or_file_path_box.drop_target_register(DND_ALL)
+        self.t1_src_folder_or_file_path_box.dnd_bind("<<Drop>>", self.t1_set_source_folder)
         # -------------------------------------------------- button
         self.t1_src_folder_or_file_path_string = ''
         self.t1_src_folder_or_file_path_btn = ctk.CTkButton(self.tab(tab), width=20, height=20, text="Add file     ",
@@ -81,13 +90,15 @@ class Tabs(ctk.CTkTabview):
         # -------------------------------------------------- text box
         self.t1_dst_folder_path_box = ctk.CTkTextbox(self.tab(tab), height=20, state="disabled")
         self.t1_dst_folder_path_box.grid(row=row + 1, column=0, columnspan=2, padx=(20, 130), pady=(0, 10), sticky='ew')
+        self.t1_dst_folder_path_box.drop_target_register(DND_ALL)
+        self.t1_dst_folder_path_box.dnd_bind("<<Drop>>", self.t1_set_destination_folder)
         # -------------------------------------------------- button
         self.t1_dst_folder_path_string = ''
         self.t1_dst_folder_path_btn = ctk.CTkButton(self.tab(tab), width=20, height=20, text="Add folder",
                                                     image=self.folder_img, command=self.t1_set_destination_folder)
         self.t1_dst_folder_path_btn.grid(row=row + 1, column=0, columnspan=2, padx=(0, 20), pady=(0, 10), sticky='e')
         # ------------------------------------------------------------------------------------- Generate button
-        row = 10
+        row = 11
         self.t1_script_btn = ctk.CTkButton(self.tab(tab), text="Generate", command=self.t1_from_folder)
         self.t1_script_btn.grid(row=row, column=0, columnspan=2, padx=20, pady=20, sticky='news')
         # --------------------------------------------------------------------------------------------------------------
@@ -110,7 +121,7 @@ class Tabs(ctk.CTkTabview):
         self.t2_btn_3.select()
         self.t2_btn_1.grid(row=row, column=0, padx=20, pady=(0, 10), sticky='w')
         self.t2_btn_2.grid(row=row, column=1, padx=20, pady=(0, 10), sticky='w')
-        self.t2_btn_3.grid(row=row+1, column=0, padx=20, pady=0, sticky='w')
+        self.t2_btn_3.grid(row=row + 1, column=0, padx=20, pady=0, sticky='w')
         # ------------------------------------------------------------------------------------- Style
         row = 3
         # -------------------------------------------------- label
@@ -120,6 +131,15 @@ class Tabs(ctk.CTkTabview):
         self.t2_style_list = ctk.CTkOptionMenu(self.tab(tab), values=['None', 'Disk'])
         self.t2_style_list.configure(command=self.t2_set_style)
         self.t2_style_list.grid(row=row, column=0, padx=(60, 0), pady=(30, 10), sticky='w')
+        # ------------------------------------------------------------------------------------- Text limiter
+        row = 3
+        # -------------------------------------------------- label
+        self.t2_text_limiter_label = ctk.CTkLabel(self.tab(tab), text='Text limiter:')
+        self.t2_text_limiter_label.grid(row=row, column=1, padx=20, pady=(30, 10), sticky='nws')
+        # -------------------------------------------------- text box
+        self.t2_text_limiter_box = ctk.CTkTextbox(self.tab(tab), height=20, width=80)
+        self.t2_text_limiter_box.grid(row=row, column=1, padx=(90, 20), pady=(30, 10), sticky='w')
+        self.t2_text_limiter_box.insert("0.0", "20")
         # ------------------------------------------------------------------------------------- Destination folder
         row = 5
         # -------------------------------------------------- Check button
@@ -133,6 +153,8 @@ class Tabs(ctk.CTkTabview):
         # -------------------------------------------------- text box
         self.t2_dst_folder_path_box = ctk.CTkTextbox(self.tab(tab), height=20, state="disabled")
         self.t2_dst_folder_path_box.grid(row=row + 2, column=0, columnspan=2, padx=(20, 130), pady=(0, 10), sticky='ew')
+        self.t2_dst_folder_path_box.drop_target_register(DND_ALL)
+        self.t2_dst_folder_path_box.dnd_bind("<<Drop>>", self.t2_set_destination_folder)
         # -------------------------------------------------- button
         self.t2_dst_folder_path_string = ''
         self.t2_dst_folder_path_btn = ctk.CTkButton(self.tab(tab), width=20, height=20, text="Add folder",
@@ -144,7 +166,7 @@ class Tabs(ctk.CTkTabview):
         self.t2_source_label = ctk.CTkLabel(self.tab(tab), text='Source:')
         self.t2_source_label.grid(row=row, column=0, padx=20, pady=(10, 0), sticky='nws')
         # -------------------------------------------------- drop list
-        self.t2_source_list = ctk.CTkOptionMenu(self.tab(tab), values=['Google', 'Bing', 'IMDB'],
+        self.t2_source_list = ctk.CTkOptionMenu(self.tab(tab), values=['Google', 'Bing', 'IMDB', 'MyAnimeList.net'],
                                                 command=self.t2_change_image_source)
         self.t2_source_list.set('Choose!')
         self.t2_source_list.grid(row=row, column=0, padx=(67, 0), pady=(10, 0), sticky='w')
@@ -160,41 +182,36 @@ class Tabs(ctk.CTkTabview):
         self.t2_force_search_net = ctk.CTkCheckBox(self.tab(tab), text='Search net again', state='disabled')
         self.t2_force_search_net.grid(row=row, column=0, padx=20, pady=(0, 0), sticky='w')
         self.t2_script_btn = ctk.CTkButton(self.tab(tab), text="Generate", command=self.t2_from_net)
-        self.t2_script_btn.grid(row=row+1, column=0, columnspan=2, padx=20, pady=20, sticky='news')
+        self.t2_script_btn.grid(row=row + 1, column=0, columnspan=2, padx=20, pady=20, sticky='news')
         # --------------------------------------------------------------------------------------------------------------
         # ------------------------------------------------------------------------------------- Tooltips
-        pad = (10, 10)
-        font = (self.font_name, 16)
         # -------------------------------------------------------------------------- Tab 1
-        text = 'Prevent image distortion (stretching)\n(Disabled for the "disk" folder style)'
-        CTkToolTip(self.t1_btn_1, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Warning!\nThis deletes the file:\n"icon.ico"'
-        CTkToolTip(self.t1_btn_2, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Create new folders with the names of the files from the source folder.\n' \
-               '(From IMDB the first result is chosen automatically)\n' \
-               '(If separator is enabled it will create the whole folder path)'
-        CTkToolTip(self.t1_btn_3, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Use separator when a name of an\nimage relates to a folder path.\nExample:\n\n' \
-               '"Archive_TV show_Season 1.png"\n\n' \
-               'The separator in this case is "_"\n' \
-               'The resulting path for the folder will be:\n\n' \
-               '"./Archive/TV show/Season 1"'
-        CTkToolTip(self.t1_btn_4, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = "Styles aren't compatible with '.ico' files."
-        CTkToolTip(self.t1_drop_list, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
+        tooltips(self.t1_btn_1, 'Prevent image distortion (stretching)\n(Disabled for the "disk" folder style)')
+        tooltips(self.t1_btn_2, 'Warning!\nThis deletes the file:\n"icon.ico"')
+        tooltips(self.t1_btn_3, 'Create new folders with the names of the files from the source folder.\n'
+                                '(If separator is enabled it will create the whole folder path)\n'
+                                'Disabled in single folder mode.')
+        tooltips(self.t1_btn_4, 'Use separator when a name of an\nimage relates to a folder path.\nExample:\n\n'
+                                '"Archive_TV show_Season 1.png"\n\n'
+                                'The separator in this case is "_"\n'
+                                'The resulting path for the folder will be:\n\n'
+                                '"./Archive/TV show/Season 1"')
+        tooltips(self.t1_drop_list, "Styles aren't compatible with '.ico' files.")
+        tooltips(self.t1_src_folder_or_file_path_box, "Drag&Drop also supported!")
+        tooltips(self.t1_src_folder_or_file_path_btn, "Drag&Drop also supported!")
+        tooltips(self.t1_dst_folder_path_box, "Drag&Drop also supported!")
+        tooltips(self.t1_dst_folder_path_btn, "Drag&Drop also supported!")
         # -------------------------------------------------------------------------- Tab 2
-        text = 'Prevent image distortion (stretching)\n(Disabled for the "disk" folder style)'
-        CTkToolTip(self.t2_btn_1, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Warning!\nThis deletes the file:\n"icon.ico"'
-        CTkToolTip(self.t2_btn_2, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'When left unchecked a random image\nfrom the source will be chosen.'
-        CTkToolTip(self.t2_btn_3, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = '"{folder name} {search term}"\nDefault search term is "folder icon".'
-        CTkToolTip(self.t2_search_term_box, delay=0.4, message=text, padding=pad, font=font, justify='left',
-                   y_offset=25)
-        text = 'Force re-download images from the net.'
-        CTkToolTip(self.t2_force_search_net, delay=0.4, message=text, padding=pad, font=font, justify='left',
-                   y_offset=25)
+        tooltips(self.t2_btn_1, 'Prevent image distortion (stretching)\n(Disabled for the "disk" folder style)')
+        tooltips(self.t2_btn_2, 'Warning!\nThis deletes the file:\n"icon.ico"')
+        tooltips(self.t2_btn_3, 'When left unchecked a random image from the source will be chosen.\n'
+                                '(From IMDB and MyAnimeList.net, the first result is chosen automatically)')
+        tooltips(self.t2_search_term_box, '"{folder name} {search term}"\nDefault search term is "folder icon".')
+        tooltips(self.t2_force_search_net, 'Force re-download images from the net.')
+        tooltips(self.t2_dst_folder_path_box, "Drag&Drop also supported!")
+        tooltips(self.t2_dst_folder_path_btn, "Drag&Drop also supported!")
+        tooltips(self.t2_text_limiter_box, "Image search works better with shorter phrases in most cases.\n"
+                                           "if the program didn't find you desired result, try changing the limiter.")
 
     # ------------------------------------------------------------------------------------- Tab 1 - From folder
     def t1_from_folder(self):
@@ -263,22 +280,37 @@ class Tabs(ctk.CTkTabview):
             self.t1_btn_1.deselect()
             self.t1_btn_1.configure(require_redraw=True, state='disabled')
 
-    def t1_set_source_folder(self):
+    def t1_set_source_folder(self, event=None):
         mode = int(self.t1_destination_type.get())
-        if mode:
-            path = choose_image_dialog()
-        else:
-            path = fd.askdirectory(mustexist=True, title='Please choose the source directory!')
-        if path is None:
-            path = ''
+        path = None
+        if event is None:
+            if mode:
+                path = choose_image_dialog()
+            else:
+                path = fd.askdirectory(mustexist=True, title='Please choose the source directory!')
+            if path is None:
+                path = ''
+        else:  # Drag&Drop
+            temp_path = event.data.strip('{}')
+            if mode:
+                file_name, file_extension = os.path.splitext(temp_path)
+                if os.path.isfile(temp_path) and file_extension in supported_file_types:
+                    path = temp_path
+            else:
+                if os.path.isdir(temp_path):
+                    path = temp_path
+            path = '' if path is None else path
         self.t1_src_folder_or_file_path_string = path
         self.t1_src_folder_or_file_path_box.configure(state="normal")
         self.t1_src_folder_or_file_path_box.delete("0.0", "end")
         self.t1_src_folder_or_file_path_box.insert("0.0", path)
         self.t1_src_folder_or_file_path_box.configure(state="disabled")
 
-    def t1_set_destination_folder(self):
-        folder = fd.askdirectory(mustexist=True, title='Please choose the destination directory!')
+    def t1_set_destination_folder(self, event=None):
+        if event is None:
+            folder = fd.askdirectory(mustexist=True, title='Please choose the destination directory!')
+        else:  # Drag&Drop
+            folder = event.data.strip('{}') if os.path.isdir(event.data.strip('{}')) else ''
         self.t1_dst_folder_path_string = folder
         self.t1_dst_folder_path_box.configure(state="normal")
         self.t1_dst_folder_path_box.delete("0.0", "end")
@@ -308,9 +340,14 @@ class Tabs(ctk.CTkTabview):
             force_re_search = int(self.t2_force_search_net.get())
             temp_string = self.t2_search_term_box.get('0.0', 'end').strip()
             looking_for = 'folder icon' if temp_string.replace(' ', '') == '' else temp_string
+            try:
+                text_limiter = int(self.t2_text_limiter_box.get('0.0', 'end').strip())
+            except ValueError:
+                text_limiter = 1000
             if os.path.isdir(dst_folder):
                 arguments = (dst_folder, folder_style, keep_image_dimensions, overwrite_files, only_dst_folder,
-                             image_source, manual_selection, force_re_search, looking_for, self.t2_script_btn)
+                             image_source, manual_selection, force_re_search, looking_for, text_limiter,
+                             self.t2_script_btn)
                 threading.Thread(target=from_net.main, args=arguments).start()
                 self.t2_force_search_net.configure(state='normal')
                 self.t2_force_search_net.deselect()
@@ -347,8 +384,11 @@ class Tabs(ctk.CTkTabview):
             text = 'Destination folder:   (Choose the folder containing the sub folders)'
             self.t2_dst_folder_label.configure(require_redraw=True, text=text)
 
-    def t2_set_destination_folder(self):
-        folder = fd.askdirectory(mustexist=True, title='Please choose the destination directory!')
+    def t2_set_destination_folder(self, event=None):
+        if event is None:
+            folder = fd.askdirectory(mustexist=True, title='Please choose the destination directory!')
+        else:  # Drag&Drop
+            folder = event.data.strip('{}') if os.path.isdir(event.data.strip('{}')) else ''
         self.t2_dst_folder_path_string = folder
         self.t2_dst_folder_path_box.configure(state="normal")
         self.t2_dst_folder_path_box.delete("0.0", "end")
@@ -360,30 +400,31 @@ class SideBar(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
-        self.grid(row=0, column=0, rowspan=7, sticky="nsew")
-        self.grid_rowconfigure(6, weight=1)
+        self.grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(9, weight=1)
         # ------------------------------------------------------------------------ top title and buttons
         title_font = ctk.CTkFont(size=20, weight="bold")
-        s_f = ctk.CTkFont(size=14, weight="bold")
-        str_l = ["Custom folder\nicons",
-                 "Thumb/icon cache:",
-                 "Windows explorer:",
-                 "Clear",
-                 "Refresh",
-                 "Restart",
-                 "Dark/Light mode"]
-        self.label_title = ctk.CTkLabel(self, text=str_l[0], font=title_font)
+        second_title_font = ctk.CTkFont(size=14, weight="bold")
+        btn_font = (ctk.ThemeManager.theme["CTkFont"]["family"], 16)
+        self.label_title = ctk.CTkLabel(self, text="Custom folder\nicons", font=title_font)
         self.label_title.grid(padx=20, pady=(20, 20))
-        self.label_cache = ctk.CTkLabel(self, text=str_l[1], font=s_f)
+        # --------------------------------
+        self.label_cache = ctk.CTkLabel(self, text="Thumb/icon cache:", font=second_title_font)
         self.label_cache.grid(row=1, padx=20, pady=(0, 0))
-        self.label_explorer = ctk.CTkLabel(self, text=str_l[2], font=s_f)
-        self.label_explorer.grid(row=3, padx=20, pady=(0, 0))
-        self.btn_clear = ctk.CTkButton(self, text=str_l[3], command=clear_thumbnail_cache)
+        self.btn_clear = ctk.CTkButton(self, text="Clear", command=clear_thumbnail_cache, font=btn_font)
         self.btn_clear.grid(row=2, padx=20, pady=(0, 20))
-        self.btn_refresh = ctk.CTkButton(self, text=str_l[4], command=refresh_explorer)
+        # --------------------------------
+        self.label_explorer = ctk.CTkLabel(self, text="Windows explorer:", font=second_title_font)
+        self.label_explorer.grid(row=3, padx=20, pady=(0, 0))
+        self.btn_refresh = ctk.CTkButton(self, text="Refresh", command=refresh_explorer, font=btn_font)
         self.btn_refresh.grid(row=4, padx=20, pady=0)
-        self.btn_restart = ctk.CTkButton(self, text=str_l[5], command=restart_explorer)
+        self.btn_restart = ctk.CTkButton(self, text="Restart", command=restart_explorer, font=btn_font)
         self.btn_restart.grid(row=5, padx=20, pady=10)
+        # --------------------------------
+        self.label_clear_downloads = ctk.CTkLabel(self, text="temp downloads:", font=second_title_font)
+        self.label_clear_downloads.grid(row=6, padx=20, pady=(0, 0))
+        self.btn_clear_downloads = ctk.CTkButton(self, text="Clear", command=clear_old_download_folder, font=btn_font)
+        self.btn_clear_downloads.grid(row=7, padx=20, pady=(0, 20))
         # ------------------------------------------------------------------------ bottom buttons images
         path = resource_path_finder(rf"source\images\github.png")
         self.github_btn_image = ctk.CTkImage(dark_image=Image.open(path), size=(23, 23))
@@ -394,22 +435,18 @@ class SideBar(ctk.CTkFrame):
         # ------------------------------------------------------------------------ bottom buttons
         self.github_btn = ctk.CTkButton(self, width=20, height=37, text="", image=self.github_btn_image,
                                         command=self.github)
-        self.github_btn.grid(row=7, column=0, padx=(0, 25), pady=20, sticky="nes")
+        self.github_btn.grid(row=10, column=0, padx=(0, 25), pady=20, sticky="nes")
         self.info_btn = ctk.CTkButton(self, width=20, height=37, text="", image=self.info_btn_image,
                                       command=lambda: info_menu(self))
-        self.info_btn.grid(row=7, column=0, padx=(1, 0), pady=20, sticky="")
+        self.info_btn.grid(row=10, column=0, padx=(1, 0), pady=20, sticky="")
         self.heart_btn = ctk.CTkButton(self, width=20, height=37, text="", image=self.heart_btn_image,
                                        command=self.heart)
-        self.heart_btn.grid(row=7, column=0, padx=(25, 0), pady=20, sticky="nws")
+        self.heart_btn.grid(row=10, column=0, padx=(25, 0), pady=20, sticky="nws")
         # ------------------------------------------------------------------------ tooltips
-        pad = (10, 10)
-        font = (ctk.ThemeManager.theme["CTkFont"]["family"], 16)
-        text = 'Clear windows thumbnail and icon cache.'
-        CTkToolTip(self.btn_clear, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Refresh windows file explorer.'
-        CTkToolTip(self.btn_refresh, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
-        text = 'Restart windows file explorer.'
-        CTkToolTip(self.btn_restart, delay=0.4, message=text, padding=pad, font=font, justify='left', y_offset=25)
+        tooltips(self.btn_clear, 'Clear windows thumbnail and icon cache.')
+        tooltips(self.btn_refresh, 'Refresh windows file explorer.')
+        tooltips(self.btn_restart, 'Restart windows file explorer.')
+        tooltips(self.btn_clear_downloads, "Delete Wicogen's temp downloads folder.")
 
     @staticmethod
     def github():
@@ -420,9 +457,10 @@ class SideBar(ctk.CTkFrame):
         webbrowser.open('https://www.buymeacoffee.com/idanach')
 
 
-class App(ctk.CTk):
-    def __init__(self):
-        super().__init__()
+class App(ctk.CTk, TkinterDnD.DnDWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.TkdndVersion = TkinterDnD._require(self)
         self.title("Wicogen")
         self.geometry("750x520")
         path = resource_path_finder(rf"source\images\app_icon.ico")
@@ -442,6 +480,7 @@ class App(ctk.CTk):
 def info_menu(master):
     def close_toplevel():
         about_window.destroy()
+
     font = ctk.ThemeManager.theme["CTkFont"]["family"]
     about_window = ctk.CTkToplevel(master)
     about_window.title("About Wicogen")
@@ -456,6 +495,7 @@ def info_menu(master):
     about_window.grid_rowconfigure(10, weight=1)
     label_title = ctk.CTkLabel(about_window, text="Wicogen - Windows icon generator", font=(font, 20, "bold"))
     label_title.grid(row=0, column=0, padx=20, pady=(10, 0), sticky='news')
+    link_color = "cyan"
     # ----------------------------------------------------------------------------------------------------------
     freeware_title = ctk.CTkLabel(about_window, text="(Wicogen is a Freeware)", font=(font, 16, "bold"))
     freeware_title.grid(row=1, column=0, padx=20, pady=(0, 10), sticky='news')
@@ -472,7 +512,7 @@ def info_menu(master):
     icon_text.grid(row=row, column=0, padx=20, pady=(10, 0), sticky='w')
     # ----------------------------------------------------------------------------------------------------------
     icon_link_1 = "Freepik"
-    icon_link_1 = ctk.CTkLabel(about_window, text=icon_link_1, font=(font, 13), text_color="cyan")
+    icon_link_1 = ctk.CTkLabel(about_window, text=icon_link_1, font=(font, 13), text_color=link_color)
     icon_link_1.grid(row=row, column=0, padx=(107, 0), pady=(10, 0), sticky='w')
     icon_link_1.bind("<Button-1>",
                      lambda event: webbrowser.open_new_tab("https://www.flaticon.com/authors/freepik"))
@@ -481,7 +521,7 @@ def info_menu(master):
     icon_link_1.bind("<Leave>", lambda event: icon_link_1.configure(font=(font, 13), cursor="arrow"))
     # ----------------------------------------------------------------------------------------------------------
     icon_link_2 = "riajulislam"
-    icon_link_2 = ctk.CTkLabel(about_window, text=icon_link_2, font=(font, 13), text_color="cyan")
+    icon_link_2 = ctk.CTkLabel(about_window, text=icon_link_2, font=(font, 13), text_color=link_color)
     icon_link_2.grid(row=row, column=0, padx=(158, 0), pady=(10, 0), sticky='w')
     icon_link_2.bind("<Button-1>",
                      lambda event: webbrowser.open_new_tab("https://www.flaticon.com/authors/riajulislam"))
@@ -494,7 +534,7 @@ def info_menu(master):
     flaticon_text.grid(row=row, column=0, padx=20, pady=(50, 0), sticky='w')
     # ----------------------------------------------------------------------------------------------------------
     flaticon_link = "www.flaticon.com"
-    flaticon_link = ctk.CTkLabel(about_window, text=flaticon_link, font=(font, 13), text_color="cyan")
+    flaticon_link = ctk.CTkLabel(about_window, text=flaticon_link, font=(font, 13), text_color=link_color)
     flaticon_link.grid(row=row, column=0, padx=(161, 0), pady=(50, 0), sticky='w')
     flaticon_link.bind("<Button-1>",
                        lambda event: webbrowser.open_new_tab("https://www.flaticon.com"))
@@ -508,7 +548,7 @@ def info_menu(master):
     copyright_label.grid(row=row, column=0, padx=20, pady=(5, 10), sticky='w')
     # ----------------------------------------------------------------------------------------------------------
     copyright_name = "Mozilla Public License 2.0"
-    copyright_link = ctk.CTkLabel(about_window, text=copyright_name, font=(font, 13), text_color="cyan")
+    copyright_link = ctk.CTkLabel(about_window, text=copyright_name, font=(font, 13), text_color=link_color)
     copyright_link.grid(row=row, column=0, padx=(172, 0), pady=(5, 10), sticky='w')
     copyright_link.bind("<Button-1>",
                         lambda event: webbrowser.open_new_tab("https://www.mozilla.org/en-US/MPL/2.0/"))
@@ -516,13 +556,19 @@ def info_menu(master):
                                                                           cursor="hand2"))
     copyright_link.bind("<Leave>", lambda event: copyright_link.configure(font=(font, 13), cursor="arrow"))
     # ----------------------------------------------------------------------------------------------------------
-    version_text = "Version 1.0.1"
+    version_text = "Version 1.1.0"
     version_label = ctk.CTkLabel(about_window, text=version_text, font=(font, 13))
     version_label.grid(row=row, column=0, padx=20, pady=(5, 10), sticky='e')
 
 
+def tooltips(tab_object, text):
+    font = (ctk.ThemeManager.theme["CTkFont"]["family"], 16)
+    CTkToolTip(tab_object, delay=0.4, message=text, padding=(10, 10), font=font, justify='left', y_offset=25)
+
+
 def main():
-    # run_with_admin_privileges()
+    ctk.set_default_color_theme(resource_path_finder("source/themes/NightTrain.json"))
+    # ctk.set_default_color_theme(resource_path_finder("source/themes/Harlequin.json"))
     app = App()
     app.mainloop()
 

@@ -17,6 +17,7 @@ def main(dst_folder: str,
          manual_selection: bool | int = 1,
          force_re_search: bool | int = 0,
          looking_for: str = 'folder icon',
+         limiter: int = 20,
          btn=None):
 
     def script(single_mode=False):
@@ -25,11 +26,11 @@ def main(dst_folder: str,
         dst_folder_path = dst_folder if single_mode else f'{dst_folder}/{folder_name}'
         if os.path.exists(f'{dst_folder_path}/icon.ico') and not overwrite_files:
             if force_re_search:
-                download_images(folder_name, source, force_re_search, 0, looking_for)
+                download_images(folder_name[:limiter], source, force_re_search, 0, looking_for)
             return None
         if btn:
             btn.configure(text="Downloading...")
-        found_cover = download_images(folder_name, source, force_re_search, manual_selection, looking_for)
+        found_cover = download_images(folder_name[:limiter], source, force_re_search, manual_selection, looking_for)
         if btn:
             btn.configure(text="Generating...")
         if found_cover:

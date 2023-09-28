@@ -1,8 +1,8 @@
 import os
+import re
 import shutil
 import urllib
 import posixpath
-import requests
 from tqdm import tqdm
 from urllib import request
 from urllib.parse import quote
@@ -18,7 +18,7 @@ class ImageDownloader:
                  verbose: bool | int = False):
         self.query = query
         self.limit = limit
-        self.output_dir = f'{output_dir}/IMDB/{self.query.replace(" ", "_")[:15]}'
+        self.output_dir = f'{output_dir}/MAL/{self.query.replace(" ", "_")[:15]}'
         # ----------------------------------------------------------------------------
         self.overwrite_old_folder = overwrite_old_folder if overwrite_old_folder in [0, 1, False, True] else True
         if os.path.isdir(self.output_dir):
@@ -41,8 +41,11 @@ class ImageDownloader:
                                       "AppleWebKit/537.36 (KHTML, like Gecko) "
                                       "Chrome/116.0.0.0 "
                                       "Safari/537.36"}
-        self.request_url = f"https://v2.sg.media-imdb.com/suggestion/" \
-                           f"{self.query[0]}/{self.query.replace(' ', '_')}.json"
+        self.request_url = f"https://myanimelist.net/search/all?q={self.query.replace(' ', '%20')}"
+        self.string = r'<a href="https://myanimelist.net/anime/(.*?)"'
+        self.link_header = 'https://myanimelist.net/anime/'
+        self.string_2 = r'src="https://cdn.myanimelist.net/images/anime/(.*?)"'
+        self.link_header_2 = 'https://cdn.myanimelist.net/images/anime/'
 
     def save_image(self, link, file_path):
         request_image = urllib.request.Request(link, None, self.headers)
@@ -70,15 +73,26 @@ class ImageDownloader:
                 print(f"[!] Issue getting: {link}\n[!] Error:: {exc}\n########################")
         return False
 
+    def get_links(self):
+        # Parse the page source and find the anime
+        try:
+            temp_request = urllib.request.Request(self.request_url, None, headers=self.headers)
+            temp_response = urllib.request.urlopen(temp_request)
+            search_html = temp_response.read().decode('utf8')
+            anime_links = re.findall(self.string, search_html)
+            anime_link = self.link_header + anime_links[1] + '/pics'
+            temp_request = urllib.request.Request(anime_link, None, headers=self.headers)
+            temp_response = urllib.request.urlopen(temp_request)
+            pics_html = temp_response.read().decode('utf8')
+            pic_links = re.findall(self.string_2, pics_html)
+            return pic_links
+        except Exception as exception:
+            if self.verbose:
+                print(exception)
+            return list()
+
     def main_loop(self):
-        res = requests.get(self.request_url)
-        res_dict = res.json()
-        links = list()
-        if 'd' in res_dict:
-            for line in res_dict['d']:
-                if 'i' in line:
-                    if 'imageUrl' in line['i']:
-                        links.append(line['i']['imageUrl'])
+        links = self.get_links()
         if self.verbose:
             print(f"\n==============================================="
                   f"\n[%] Indexed {len(links)} Images."
@@ -90,7 +104,7 @@ class ImageDownloader:
             if not self.verbose:
                 pbar.refresh()
             if self.download_count < self.limit:
-                update_pbar = self.download_image(link)
+                update_pbar = self.download_image(f'{self.link_header_2}{link.replace(".jpg", "l.jpg")}')
                 if not self.verbose:
                     if update_pbar:
                         pbar.update()
@@ -120,7 +134,7 @@ def downloader(query: str = '',
                overwrite: bool | int = False,
                timeout: int = 5,
                verbose: bool | int = False):
-    """This library downloads images from IMDB images by a search term (query)
+    """This library downloads images from MyAnimeList.net by a search term (query)
 
     query - Search term, can be anything!
     limit - Number of images to download. (If there are fewer images than limit, stopping after downloading all of them)
