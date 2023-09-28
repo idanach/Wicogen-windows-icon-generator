@@ -9,6 +9,7 @@ Supported sources for online search:
   - Bing images
   - IMDB (covers for movies and TV shows)
   - MyAnimeList.net (covers for anime movies and TV shows)
+
 For Movie/TV, I recommend the disk style available in the drop-down.
 
 If you find all the settings confusing, hover over the button, a Tooltip window will pop up.
