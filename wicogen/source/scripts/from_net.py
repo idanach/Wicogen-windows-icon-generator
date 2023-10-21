@@ -1,3 +1,5 @@
+import time
+
 from .source_commands import *
 
 
@@ -63,6 +65,10 @@ def main(dst_folder: str,
         for folder_name in os.listdir(dst_folder):
             if os.path.isdir(f'{dst_folder}/{folder_name}'):
                 script()
-    clear_thumbnail_cache()
+    refresh_explorer(False)
+    time.sleep(2)
+    refresh_explorer(False)
+    time.sleep(2)
+    refresh_explorer(False)
     if btn:
         btn.configure(text="Generate", state="normal")

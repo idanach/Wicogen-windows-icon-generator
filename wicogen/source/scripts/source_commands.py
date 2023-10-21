@@ -2,6 +2,8 @@ import os
 import sys
 import shutil
 import random
+import ctypes
+import time
 from PIL import Image, ImageDraw
 from colorama import Fore, Style
 from tkinter import filedialog as fd
@@ -19,7 +21,7 @@ supported_file_types = ('.bmp', '.cur', '.dds', '.dng', '.fts', '.nef', '.tga', 
                         '.PCX', '.PGM', '.PNM', '.PPM', '.PSD', '.RAS', '.SGI', '.XBM',
                         '.JPG', '.JPEG', '.JPE', '.JIF', '.JFIF', '.JFI', '.JP2', '.JPS',
                         '.PNG', '.GIF', '.WEBP', '.TIFF', '.TIF', '.ICO')
-version = '1.2.1'
+version = '1.2.2'
 styles = ['None', 'Disk']
 
 
@@ -31,15 +33,18 @@ def clear_thumbnail_cache():
     os.system(r'del /f /s /q /a %LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db >nul 2>&1')
     os.system(r'del /f /s /q /a %LocalAppData%\Microsoft\Windows\Explorer\iconcache_*.db >nul 2>&1')
     os.system(r'c:\Windows\System32\ie4uinit.exe -ClearIconCache >nul 2>&1')
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
     print(f'{Fore.LIGHTCYAN_EX}--------------------------- Cleared Windows icon cache '
           f'---------------------------{Style.RESET_ALL}')
 
 
-def refresh_explorer():
+def refresh_explorer(verbose: bool | int = 1):
     """Refresh file explorer."""
     os.system(r"c:\Windows\System32\ie4uinit.exe -show >nul 2>&1")
-    print(f'{Fore.LIGHTCYAN_EX}------------------------------- Refreshed explorer '
-          f'-------------------------------{Style.RESET_ALL}')
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
+    if verbose:
+        print(f'{Fore.LIGHTCYAN_EX}------------------------------- Refreshed explorer '
+              f'-------------------------------{Style.RESET_ALL}')
 
 
 def restart_explorer():

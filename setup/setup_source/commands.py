@@ -8,7 +8,7 @@ from win32com.client import Dispatch
 files = '.bmp OR .cur OR .dds OR .dng OR .fts OR .nef OR .tga OR .pbm OR .pcd OR ' \
         '.pcx OR .pgm OR .pnm OR .ppm OR .psd OR .ras OR .sgi OR .xbm OR .jpg OR ' \
         '.jpeg OR .jpe OR .jif OR .jfif OR .jfi OR .jp2 OR .jps OR .png OR .gif OR .webp OR .tiff OR .tif OR .ico'
-version = '1.2.1'
+version = '1.2.2'
 
 
 def resource_path_finder(relative_path: str, verbose: bool = False):
@@ -168,10 +168,10 @@ def delete_shortcut(dst_folder: str = 'folder',
 def install_extensions(install_location: str = 'Wicogen'):
     print("install_extensions")
     make_dir_tree(install_location)
-    src_rar = resource_path_finder(rf'setup_source\Wicogen_extensions-V{version}.rar')
+    src_rar = resource_path_finder(rf'setup_source\Wicogen_extensions.rar')
     patoolib.extract_archive(src_rar, outdir=install_location, interactive=False)
     # --------------------------------------------------------------------------- context menu additions
-    exe_path = rf'"{install_location}\Wicogen_extensions-V{version}\Wicogen_extensions-V{version}.exe"'
+    exe_path = rf'"{install_location}\Wicogen_extensions\Wicogen_extensions.exe"'
     command_extension = rf'{exe_path} "%V"'
     command_reset_icon = rf'{exe_path} reset "%V"'
     command_clear_cache = rf'{exe_path} clear'
@@ -193,9 +193,9 @@ def install_main(install_location: str = 'Wicogen',
                  uninstaller: bool | int = 0):
     print("install_main")
     make_dir_tree(install_location)
-    src_rar = resource_path_finder(rf'setup_source\Wicogen-V{version}.rar')
+    src_rar = resource_path_finder(rf'setup_source\Wicogen.rar')
     patoolib.extract_archive(src_rar, outdir=install_location, interactive=False)
-    exe_path = rf'{install_location}\Wicogen-V{version}\Wicogen-V{version}.exe'
+    exe_path = rf'{install_location}\Wicogen\Wicogen.exe'
     if desktop:
         create_shortcut(os.path.expanduser("~\\Desktop"), exe_path, "Wicogen")
     if start_menu:
@@ -203,7 +203,7 @@ def install_main(install_location: str = 'Wicogen',
     if uninstaller:
         dir_path = os.path.expanduser("~\\Documents\\Wicogen")
         make_dir_tree(dir_path)
-        setup_exe = rf"{dir_path}\\Wicogen_setup-V{version}.exe"
+        setup_exe = rf"{dir_path}\\Wicogen_setup.exe"
         src_file = sys.argv[0]
         copy_file(src_file, setup_exe)
         if start_menu:

@@ -63,6 +63,10 @@ def main(source_path: str,
               f'{Fore.LIGHTGREEN_EX}# ---------------------------------------------------------------{Style.RESET_ALL}')
         for temp_file in os.listdir(source_path):
             bulk_mode(temp_file)
-    clear_thumbnail_cache()
+    refresh_explorer(False)
+    time.sleep(2)
+    refresh_explorer(False)
+    time.sleep(2)
+    refresh_explorer(False)
     if btn:
         btn.configure(text="Generate", state="normal")

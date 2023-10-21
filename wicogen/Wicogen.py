@@ -67,7 +67,7 @@ class Tabs(ctk.CTkTabview):
         self.t1_destination_type.grid(row=row, column=0, padx=20, pady=(10, 0), sticky='w')
         self.t1_destination_type.select()
         # -------------------------------------------------- label
-        self.t1_src_label = ctk.CTkLabel(self.tab(tab), text='Source file:', font=title_font)
+        self.t1_src_label = ctk.CTkLabel(self.tab(tab), text='Source path:', font=title_font)
         self.t1_src_label.grid(row=row + 1, column=0, columnspan=2, padx=20, pady=(10, 0), sticky='nws')
         # -------------------------------------------------- text box
         self.t1_src_path_box = ctk.CTkTextbox(self.tab(tab), height=20, state="disabled")
@@ -77,7 +77,7 @@ class Tabs(ctk.CTkTabview):
         self.t1_src_path_box.dnd_bind("<<Drop>>", self.t1_set_source)
         # -------------------------------------------------- button
         self.t1_src_path_string = ''
-        self.t1_src_path_btn = ctk.CTkButton(self.tab(tab), width=20, height=20, text="Add file     ",
+        self.t1_src_path_btn = ctk.CTkButton(self.tab(tab), width=20, height=20, text="Add path   ",
                                              image=self.folder_img, command=self.t1_set_source)
         self.t1_src_path_btn.grid(row=row + 2, column=0, columnspan=2, padx=(0, 20), pady=(0, 10), sticky='e')
         # ------------------------------------------------------------------------------------- Destination folder

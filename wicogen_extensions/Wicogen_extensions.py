@@ -1,6 +1,8 @@
 import os
 import sys
 import subprocess
+import time
+import ctypes
 from PIL import Image
 from tkinter import filedialog as fd
 
@@ -23,6 +25,18 @@ def clear_thumbnail_cache():
     subprocess.call(r'del /f /s /q /a %LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db >nul 2>&1', shell=True)
     subprocess.call(r'del /f /s /q /a %LocalAppData%\Microsoft\Windows\Explorer\iconcache_*.db >nul 2>&1', shell=True)
     subprocess.call(r'c:\Windows\System32\ie4uinit.exe -ClearIconCache >nul 2>&1', shell=True)
+    time.sleep(2)
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
+
+
+def refresh_explorer():
+    """Refresh file explorer."""
+    subprocess.call(r"c:\Windows\System32\ie4uinit.exe -show >nul 2>&1")
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
+    time.sleep(2)
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
+    time.sleep(2)
+    ctypes.windll.shell32.SHChangeNotify(0x08000000, 0x0000, None, None)
 
 
 def choose_image_dialog(start_folder: str = ''):
@@ -95,7 +109,7 @@ def script(destination_dir: str, source_image: str):
     if image_extension in supported_file_types:
         write_desktop_ini_file(destination_dir)
         generate_icon(source_image, destination_dir)
-        clear_thumbnail_cache()
+        refresh_explorer()
 
 
 def reset_folder(dst_folder: str):
