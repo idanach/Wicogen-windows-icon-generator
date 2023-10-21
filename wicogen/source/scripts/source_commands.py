@@ -19,7 +19,7 @@ supported_file_types = ('.bmp', '.cur', '.dds', '.dng', '.fts', '.nef', '.tga', 
                         '.PCX', '.PGM', '.PNM', '.PPM', '.PSD', '.RAS', '.SGI', '.XBM',
                         '.JPG', '.JPEG', '.JPE', '.JIF', '.JFIF', '.JFI', '.JP2', '.JPS',
                         '.PNG', '.GIF', '.WEBP', '.TIFF', '.TIF', '.ICO')
-version = '1.2.0'
+version = '1.2.1'
 styles = ['None', 'Disk']
 
 

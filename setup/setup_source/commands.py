@@ -8,7 +8,7 @@ from win32com.client import Dispatch
 files = '.bmp OR .cur OR .dds OR .dng OR .fts OR .nef OR .tga OR .pbm OR .pcd OR ' \
         '.pcx OR .pgm OR .pnm OR .ppm OR .psd OR .ras OR .sgi OR .xbm OR .jpg OR ' \
         '.jpeg OR .jpe OR .jif OR .jfif OR .jfi OR .jp2 OR .jps OR .png OR .gif OR .webp OR .tiff OR .tif OR .ico'
-version = '1.2.0'
+version = '1.2.1'
 
 
 def resource_path_finder(relative_path: str, verbose: bool = False):

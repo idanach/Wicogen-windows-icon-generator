@@ -56,7 +56,7 @@ class ImageDownloader:
         self.search_engine = temp if temp in ['google', 'bing'] else 'google'
         self.query = query
         self.limit = limit
-        self.output_dir = f'{output_dir}/{self.search_engine}/{self.query.replace(" ", "_")[:15]}'
+        self.output_dir = f'{output_dir}/{self.search_engine}/{self.query.replace(" ", "_")}'
         # ----------------------------------------------------------------------------
         self.overwrite_old_folder = overwrite_old_folder if overwrite_old_folder in [0, 1, False, True] else True
         if os.path.isdir(self.output_dir):
